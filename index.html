@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Todo List - F2E week01</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
+        crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="css/all.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <header>
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="#" :class="{'active':visibility == 'all'}" @click="visibility = 'all'"> My Tasks</a>
+                        </li>
+                        <li>
+                            <a href="#" :class="{'active':visibility == 'progress'}" @click="visibility = 'progress'">In Progress</a>
+                        </li>
+                        <li>
+                            <a href="#" :class="{'active':visibility == 'completed'}" @click="visibility = 'completed'">Completed</a>
+                        </li>
+                    </ul>
+                </nav>
+            </header>
+            <div class="wrapper">
+                <div class="main">
+                    <div class="addToggle" @click="isAdd = true" v-if="isAdd == false">
+                        <input type="text" placeholder="+ Add Task" />
+                    </div>
+                    <div class="addbox" v-if="isAdd == true">
+                        <div class="inputArea">
+                            <input id="checkBox" type="checkbox">
+                            <input type="text" placeholder="Type Something Here…" v-model="newTodo.title">
+                            <span>
+                                <i class="far fa-star fa-lg"></i>
+                            </span>
+                            <span>
+                                <i class="fas fa-pencil-alt fa-lg"></i>
+                            </span>
+                            <span>
+                                <i class="fas fa-times fa-lg" @click="isAdd = false"></i>
+                            </span>
+                        </div>
+                        <div class="editArea">
+                            <div class="detailArea">
+                                <label class="deadline">Deadline</label>
+                                <input id="date" type="date" v-model="newTodo.setTime.date">
+                                <input id="time" type="time" v-model="newTodo.setTime.time">
+                                <label class="file">File</label>
+                                <a href="#" class="addFile"></a>
+                                <label class="comment">Comment</label>
+                                <textarea v-model="newTodo.comment"></textarea>
+                            </div>
+                            <div class="buttonArea">
+                                <a href="#" class="btn cancel" @click="isAdd = false">Cancel</a>
+                                <a href="#" class="btn addTask" @click="addTodo">Add Task</a>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="todoList">
+                        <li class="todo" v-for="(item,key) in filteredTodos">
+                            <div class="inputArea listStripe" :class="{'stared':item.isStared,'finished':item.completed}">
+                                <input type="checkbox" :id="item.id" v-model="item.completed">
+                                <label :for="item.id">
+                                    <input type="text" :disabled="item.isFixed" v-model="item.title">
+                                </label>
+                                <span>
+                                    <i class="far fa-star fa-lg" @click="item.isStared = !item.isStared"></i>
+                                </span>
+                                <span>
+                                    <i class="fas fa-pencil-alt fa-lg" @click="item.isFixed = !item.isFixed"></i>
+                                </span>
+                                <span>
+                                    <i class="fas fa-times fa-lg" @click="deleteTodo(key)"></i>
+                                </span>
+                                <div class="iconline">
+                                    <span>
+                                        <i class="far fa-calendar-alt" v-if="item.setDatew !== ''"></i> {{item.setDate}}
+                                    </span>
+                                    <!-- <span>
+                                    <i class="far fa-file" v-if="item."></i>
+                                </span> -->
+                                    <span>
+                                        <i class="far fa-comment-dots" v-if="item.comment !== ''"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="editArea" v-if="!item.isFixed">
+                                <div class="detailArea">
+                                    <label class="deadline">Deadline</label>
+                                    <input id="date" type="date" v-model="item.setDate">
+                                    <input id="time" type="time" v-model="item.setTime">
+                                    <label class="file">File</label>
+                                    <a href="#" class="addFile"></a>
+                                    <label class="comment">Comment</label>
+                                    <textarea v-model="item.comment"></textarea>
+                                </div>
+                                <div class="buttonArea">
+                                    <a href="#" class="btn cancel" @click.prevent="item.isFixed = !item.isFixed">Cancel</a>
+                                    <a href="#" class="btn addTask" @click.prevent="editTodo(item)">Save</a>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- <li class="todo">
+                        <div class="inputArea listStripe stared">
+                            <input id="checkBox" type="checkbox">
+                            <input type="text" placeholder="Type Something Here…">
+                            <span>
+                                <i class="far fa-star fa-lg"></i>
+                            </span>
+                            <span>
+                                <i class="fas fa-pencil-alt fa-lg"></i>
+                            </span>
+                            <div class="iconline">
+                                <span>
+                                    <i class="far fa-file"></i>
+                                </span>
+                                <span>
+                                    <i class="far fa-comment-dots"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="todo">
+                        <div class="inputArea listStripe">
+                            <input id="checkBox" type="checkbox">
+                            <input type="text" placeholder="Type Something Here…">
+                            <span>
+                                <i class="far fa-star fa-lg"></i>
+                            </span>
+                            <span>
+                                <i class="fas fa-pencil-alt fa-lg"></i>
+                            </span>
+                            <div class="iconline">
+                                <span>
+                                    <i class="far fa-calendar-alt"></i> 2019/6/18
+                                </span>
+                            </div>
+                        </div>
+
+                    </li>
+                    <li class="todo">
+                        <div class="inputArea listStripe">
+                            <input id="checkBox" type="checkbox">
+                            <input type="text" placeholder="Type Something Here…">
+                            <span>
+                                <i class="far fa-star fa-lg"></i>
+                            </span>
+                            <span>
+                                <i class="fas fa-pencil-alt fa-lg"></i>
+                            </span>
+                            <div class="iconline">
+                                <span>
+                                    <i class="far fa-file"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="todo">
+                        <div class="inputArea listStripe finished">
+                            <input id="checkBox" type="checkbox" checked>
+                            <input type="text" placeholder="Type Something Here…" disabled>
+                            <span>
+                                <i class="far fa-star fa-lg"></i>
+                            </span>
+                            <span>
+                                <i class="fas fa-pencil-alt fa-lg"></i>
+                            </span>
+                            <div class="iconline">
+                            </div>
+                        </div>
+
+                    </li> -->
+                    </ul>
+                    <div id="todoCount">
+                        <span class="ongoingCount" v-if="visibility !== 'completed'"> {{ongoingCount}} tasks left</span>
+                        <span class="completedCount" v-if="visibility !== 'progress'"> {{completedCount}} tasks completed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="js/vue.js"></script>
+    <script src="js/all.js"></script>
+</body>
+
+</html>
